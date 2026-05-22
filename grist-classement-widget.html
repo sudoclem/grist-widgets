@@ -280,18 +280,22 @@ async function handleSubmit() {
   errEl.classList.remove('visible');
 
   try {
-    // Une ligne par contribution : on stocke le nom de l'équipe dans le champ "Nom_equipe"
-    const actions = orderedIds.map((id, index) => {
+    // Une ligne par contribution dans Classements
+    const rankActions = orderedIds.map((id, index) => {
       const c = contributions.find(r => r.id === id);
       return ['AddRecord', TARGET_TABLE, null, {
         membre:     memberName,
         Nom_equipe: c ? c.nom_equipe : String(id),
-        rang:       index + 1,
-        commentaire: index === 0 ? comment : ''
+        rang:       index + 1
       }];
     });
 
-    await grist.docApi.applyUserActions(actions);
+    // Une ligne dans Avis pour le commentaire général
+    const avisActions = comment
+      ? [['AddRecord', 'Avis', null, { membre: memberName, commentaire: comment }]]
+      : [];
+
+    await grist.docApi.applyUserActions([...rankActions, ...avisActions]);
     showSuccess(memberName);
   } catch (err) {
     btn.disabled = false;
