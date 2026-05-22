@@ -142,37 +142,23 @@ let contributions = [];
 let orderedIds    = [];
 let dragSrcId     = null;
 const TARGET_TABLE = 'Classements';
+const COL_NOM      = 'Nom_equipe';
+const COL_LIEN     = 'Lien';
 
 // ─── Grist init ───────────────────────────────────────────────────────────────
-grist.ready({
-  requiredAccess: 'full',
-  columns: [
-    {
-      name: 'nom_equipe',
-      title: 'Nom de l\'équipe',
-      type: 'Text',
-      description: 'Nom de l\'équipe ou de la contribution à classer.'
-    },
-    {
-      name: 'lien',
-      title: 'Lien vers la contribution',
-      type: 'Text',
-      optional: true,
-      description: 'URL permettant d\'accéder à la contribution.'
-    }
-  ]
-});
+grist.ready({ requiredAccess: 'full' });
 
-grist.onRecords(function(records, mappings) {
-  const mapped = records.map(r => grist.mapColumnNames(r, mappings));
-  contributions = mapped.filter(r => r && r.nom_equipe !== undefined);
+grist.onRecords(function(records) {
+  contributions = records
+    .filter(r => r[COL_NOM] !== undefined && r[COL_NOM] !== null && r[COL_NOM] !== '')
+    .map(r => ({ id: r.id, nom_equipe: r[COL_NOM], lien: r[COL_LIEN] || '' }));
 
   if (!contributions.length) {
     document.getElementById('app').innerHTML = `
       <div class="mapping-state">
-        <div style="font-size:32px;">🔗</div>
-        <p>Associez vos colonnes dans le panneau latéral de Grist<br>
-        (Creator Panel → <strong>Colonnes</strong>) pour afficher les contributions.</p>
+        <div style="font-size:32px;">⚠️</div>
+        <p>Aucune contribution trouvée.<br>
+        Vérifiez que la table <strong>Contributions</strong> contient bien les colonnes <strong>Nom_equipe</strong> et <strong>Lien</strong>.</p>
       </div>`;
     return;
   }
