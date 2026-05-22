@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Classement des contributions</title>
+<script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F7F5F0;
+    --surface: #FFFFFF;
+    --border: #E2DDD6;
+    --border-strong: #C8C2B8;
+    --text: #1A1714;
+    --text-muted: #7A746C;
+    --accent: #3D3A35;
+    --gold: #B8860B;
+    --gold-bg: #FDF8ED;
+    --silver: #7A8694;
+    --silver-bg: #F2F4F6;
+    --bronze: #9C6B3C;
+    --bronze-bg: #FBF2EA;
+    --success: #2D6A4F;
+    --success-bg: #EAF4EE;
+    --radius: 10px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  .page { max-width: 680px; margin: 0 auto; padding: 32px 20px 60px; }
+
+  .header { margin-bottom: 28px; }
+  .header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 26px; font-weight: 400; line-height: 1.2; margin-bottom: 8px;
+  }
+  .header p { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+
+  .field-block { margin-bottom: 24px; }
+  .field-label {
+    display: block; font-size: 12px; font-weight: 500;
+    letter-spacing: 0.07em; text-transform: uppercase;
+    color: var(--text-muted); margin-bottom: 8px;
+  }
+  .field-input {
+    width: 100%; padding: 10px 14px;
+    border: 1px solid var(--border); border-radius: var(--radius);
+    font-family: 'DM Sans', sans-serif; font-size: 14px;
+    background: var(--surface); color: var(--text); outline: none;
+    transition: border-color 0.15s;
+  }
+  .field-input:focus { border-color: var(--accent); }
+  .field-input::placeholder { color: var(--text-muted); }
+
+  .section-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .section-head .label {
+    font-size: 12px; font-weight: 500; letter-spacing: 0.07em;
+    text-transform: uppercase; color: var(--text-muted);
+  }
+  .section-head .hint {
+    font-size: 12px; color: var(--text-muted); margin-left: auto;
+    display: flex; align-items: center; gap: 4px;
+  }
+
+  .contrib-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 28px; }
+
+  .contrib-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 12px 14px;
+    display: flex; align-items: center; gap: 12px;
+    cursor: grab; user-select: none;
+    transition: box-shadow 0.15s, border-color 0.15s, opacity 0.15s;
+    box-shadow: var(--shadow);
+  }
+  .contrib-card:active { cursor: grabbing; }
+  .contrib-card.dragging { opacity: 0.35; box-shadow: none; }
+  .contrib-card.drag-over { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(61,58,53,0.12); }
+
+  .rank-badge {
+    width: 30px; height: 30px; border-radius: 50%;
+    font-size: 13px; font-weight: 500;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: background 0.2s, color 0.2s;
+  }
+  .rank-1 { background: var(--gold-bg); color: var(--gold); border: 1px solid #E8D090; }
+  .rank-2 { background: var(--silver-bg); color: var(--silver); border: 1px solid #CDD3D9; }
+  .rank-3 { background: var(--bronze-bg); color: var(--bronze); border: 1px solid #DFC0A0; }
+  .rank-other { background: #F4F2EE; color: var(--text-muted); border: 1px solid var(--border); }
+
+  .drag-icon { color: var(--border-strong); flex-shrink: 0; display: flex; flex-direction: column; gap: 3px; padding: 2px; }
+  .drag-icon span { display: block; width: 14px; height: 1.5px; background: currentColor; border-radius: 2px; }
+
+  .contrib-body { flex: 1; min-width: 0; }
+  .contrib-title { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .contrib-meta { display: flex; align-items: center; gap: 10px; }
+  .score-pill {
+    font-size: 11px; background: #F4F2EE; color: var(--text-muted);
+    border: 1px solid var(--border); border-radius: 20px; padding: 2px 9px; white-space: nowrap;
+  }
+  .contrib-link {
+    font-size: 12px; color: #5C7CFA; text-decoration: none;
+    display: flex; align-items: center; gap: 3px; white-space: nowrap;
+  }
+  .contrib-link:hover { text-decoration: underline; }
+
+  .comment-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px; margin-bottom: 28px;
+    box-shadow: var(--shadow);
+  }
+  .comment-instruction { font-size: 13px; color: var(--text-muted); line-height: 1.65; margin-bottom: 12px; font-style: italic; }
+  .comment-card textarea {
+    width: 100%; min-height: 96px; padding: 10px 12px;
+    border: 1px solid var(--border); border-radius: 8px;
+    font-family: 'DM Sans', sans-serif; font-size: 14px;
+    color: var(--text); background: var(--bg);
+    resize: vertical; outline: none; line-height: 1.6;
+    transition: border-color 0.15s;
+  }
+  .comment-card textarea:focus { border-color: var(--accent); }
+  .comment-card textarea::placeholder { color: var(--text-muted); }
+
+  .submit-btn {
+    width: 100%; padding: 13px; background: var(--text); color: #fff;
+    border: none; border-radius: var(--radius);
+    font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500;
+    cursor: pointer; letter-spacing: 0.01em;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+  .submit-btn:hover { opacity: 0.85; }
+  .submit-btn:active { transform: scale(0.99); }
+  .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .error-msg {
+    font-size: 13px; color: #C0392B; background: #FDF0EE;
+    border: 1px solid #F5C6C0; border-radius: 8px;
+    padding: 10px 14px; margin-bottom: 16px; display: none;
+  }
+  .error-msg.visible { display: block; }
+
+  /* Waiting for mapping */
+  .mapping-state { text-align: center; padding: 48px 24px; }
+  .mapping-state p { color: var(--text-muted); font-size: 14px; line-height: 1.6; margin-top: 12px; }
+  .mapping-icon { font-size: 32px; margin-bottom: 4px; }
+
+  .spinner {
+    width: 32px; height: 32px; border: 2px solid var(--border);
+    border-top-color: var(--accent); border-radius: 50%;
+    animation: spin 0.8s linear infinite; margin: 0 auto 12px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .success-state { text-align: center; padding: 48px 24px; }
+  .success-state .state-title {
+    font-family: 'DM Serif Display', serif; font-size: 22px;
+    font-weight: 400; color: var(--success); margin-bottom: 6px;
+  }
+  .success-state p { color: var(--text-muted); font-size: 14px; line-height: 1.6; margin-top: 8px; }
+</style>
+</head>
+<body>
+<div class="page" id="app">
+  <div style="text-align:center;padding:48px 24px;">
+    <div class="spinner"></div>
+    <p style="color:var(--text-muted);font-size:14px;">Chargement…</p>
+  </div>
+</div>
+
+<script>
+// ─── State ────────────────────────────────────────────────────────────────────
+let contributions = [];   // données mappées
+let orderedIds    = [];   // ordre courant (tableau d'ids)
+let dragSrcId     = null;
+let mappingReady  = false;
+const TARGET_TABLE = 'Classements';
+
+// ─── Grist init ───────────────────────────────────────────────────────────────
+grist.ready({
+  requiredAccess: 'full',
+  columns: [
+    {
+      name: 'titre',
+      title: 'Titre de la contribution',
+      type: 'Text',
+      description: 'Nom ou intitulé de la contribution à classer.'
+    },
+    {
+      name: 'lien',
+      title: 'Lien vers la contribution',
+      type: 'Text',
+      optional: true,
+      description: 'URL permettant d\'accéder à la contribution.'
+    },
+    {
+      name: 'score_vote',
+      title: 'Score du vote',
+      type: 'Numeric',
+      optional: true,
+      description: 'Score obtenu lors du vote initial (facultatif).'
+    }
+  ]
+});
+
+// Appelé à chaque mise à jour des enregistrements de la table liée
+grist.onRecords(function(records, mappings) {
+  // mapColumnNames traduit les noms réels → noms déclarés dans columns ci-dessus
+  const mapped = records.map(r => grist.mapColumnNames(r, mappings));
+  // On filtre les lignes où le mapping minimum (titre) n'est pas encore configuré
+  contributions = mapped.filter(r => r && r.titre !== undefined);
+
+  if (!contributions.length && !mappingReady) {
+    renderMappingNeeded();
+    return;
+  }
+  mappingReady = true;
+  orderedIds = contributions.map(r => r.id);
+  renderApp();
+});
+
+// ─── Render helpers ───────────────────────────────────────────────────────────
+function renderMappingNeeded() {
+  document.getElementById('app').innerHTML = `
+    <div class="mapping-state">
+      <div class="mapping-icon">🔗</div>
+      <p>Configurez le mapping des colonnes dans le panneau latéral de Grist<br>
+      (Creator Panel → <strong>Colonnes</strong>) pour associer vos colonnes au widget.</p>
+    </div>`;
+}
+
+function renderApp() {
+  document.getElementById('app').innerHTML = `
+    <div class="header">
+      <h1>Classement des contributions</h1>
+      <p>Glissez et déposez les contributions pour les ordonner selon vos préférences, de la plus prioritaire (rang&nbsp;1) à la moins prioritaire.</p>
+    </div>
+
+    <div class="field-block">
+      <label class="field-label" for="member-name">Votre nom</label>
+      <input class="field-input" id="member-name" type="text" placeholder="Prénom Nom" autocomplete="name" />
+    </div>
+
+    <div class="section-head">
+      <span class="label">Votre classement</span>
+      <span class="hint">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7-7 7 7"/></svg>
+        Glisser-déposer pour réordonner
+      </span>
+    </div>
+
+    <div class="contrib-list" id="contrib-list">${renderCards()}</div>
+
+    <div class="comment-card">
+      <p class="comment-instruction">Vous pouvez, si vous le souhaitez, expliquer ou contextualiser votre classement.</p>
+      <textarea id="comment-field" placeholder="Partagez ici vos observations, critères de choix ou toute remarque utile pour le comité…"></textarea>
+    </div>
+
+    <div class="error-msg" id="error-msg"></div>
+    <button class="submit-btn" id="submit-btn" onclick="handleSubmit()">Enregistrer mon classement</button>
+  `;
+  attachDragHandlers();
+}
+
+function renderCards() {
+  return orderedIds.map((id, index) => {
+    const c = contributions.find(r => r.id === id);
+    if (!c) return '';
+    const rank = index + 1;
+    const rankClass = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : 'rank-other';
+    const hasLink  = c.lien  && String(c.lien).trim();
+    const hasScore = c.score_vote !== undefined && c.score_vote !== null && c.score_vote !== '';
+
+    return `
+      <div class="contrib-card" draggable="true" data-id="${id}">
+        <div class="drag-icon" aria-hidden="true"><span></span><span></span><span></span></div>
+        <div class="rank-badge ${rankClass}">${rank}</div>
+        <div class="contrib-body">
+          <div class="contrib-title" title="${escHtml(c.titre)}">${escHtml(c.titre)}</div>
+          <div class="contrib-meta">
+            ${hasScore ? `<span class="score-pill">Score : ${c.score_vote}</span>` : ''}
+            ${hasLink  ? `<a class="contrib-link" href="${escHtml(c.lien)}" target="_blank" rel="noopener">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+              </svg>Voir la contribution
+            </a>` : ''}
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function refreshList() {
+  const list = document.getElementById('contrib-list');
+  if (list) { list.innerHTML = renderCards(); attachDragHandlers(); }
+}
+
+// ─── Drag & Drop ─────────────────────────────────────────────────────────────
+function attachDragHandlers() {
+  document.querySelectorAll('.contrib-card').forEach(card => {
+    card.addEventListener('dragstart', onDragStart);
+    card.addEventListener('dragover',  onDragOver);
+    card.addEventListener('dragleave', onDragLeave);
+    card.addEventListener('drop',      onDrop);
+    card.addEventListener('dragend',   onDragEnd);
+  });
+}
+
+function onDragStart(e) {
+  dragSrcId = parseInt(this.dataset.id);
+  this.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+}
+function onDragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  document.querySelectorAll('.contrib-card').forEach(c => c.classList.remove('drag-over'));
+  this.classList.add('drag-over');
+}
+function onDragLeave() { this.classList.remove('drag-over'); }
+function onDrop(e) {
+  e.preventDefault();
+  const targetId = parseInt(this.dataset.id);
+  if (dragSrcId === targetId) return;
+  const srcIdx = orderedIds.indexOf(dragSrcId);
+  const tgtIdx = orderedIds.indexOf(targetId);
+  orderedIds.splice(srcIdx, 1);
+  orderedIds.splice(tgtIdx, 0, dragSrcId);
+  refreshList();
+}
+function onDragEnd() {
+  document.querySelectorAll('.contrib-card').forEach(c => c.classList.remove('dragging', 'drag-over'));
+  dragSrcId = null;
+}
+
+// ─── Submit ───────────────────────────────────────────────────────────────────
+async function handleSubmit() {
+  const memberName = document.getElementById('member-name').value.trim();
+  const comment    = document.getElementById('comment-field').value.trim();
+  const errEl      = document.getElementById('error-msg');
+
+  if (!memberName) { showError('Veuillez indiquer votre nom avant d\'enregistrer.'); return; }
+
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.textContent = 'Enregistrement…';
+  errEl.classList.remove('visible');
+
+  try {
+    const actions = orderedIds.map((id, index) => [
+      'AddRecord', TARGET_TABLE, null, {
+        membre:       memberName,
+        contribution: id,
+        rang:         index + 1,
+        commentaire:  index === 0 ? comment : ''
+      }
+    ]);
+    await grist.docApi.applyUserActions(actions);
+    showSuccess(memberName);
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = 'Enregistrer mon classement';
+    showError('Erreur lors de l\'enregistrement. Vérifiez que la table « ' + TARGET_TABLE + ' » existe dans votre document Grist.');
+    console.error(err);
+  }
+}
+
+function showSuccess(name) {
+  document.getElementById('app').innerHTML = `
+    <div class="success-state">
+      <div style="font-size:36px;margin-bottom:8px;">✅</div>
+      <div class="state-title">Classement enregistré</div>
+      <p>Merci ${escHtml(name)}, votre classement a bien été transmis au comité.</p>
+    </div>`;
+}
+
+function showError(msg) {
+  const el = document.getElementById('error-msg');
+  if (el) { el.textContent = msg; el.classList.add('visible'); }
+}
+
+function escHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>
