@@ -294,14 +294,14 @@ async function handleSubmit() {
   errEl.classList.remove('visible');
 
   try {
-    // Une ligne par contribution : on stocke le nom de l'équipe dans le champ "contribution"
+    // Une ligne par contribution : on stocke le nom de l'équipe dans le champ "Nom_equipe"
     const actions = orderedIds.map((id, index) => {
       const c = contributions.find(r => r.id === id);
       return ['AddRecord', TARGET_TABLE, null, {
-        membre:       memberName,
-        contribution: c ? c.nom_equipe : String(id),
-        rang:         index + 1,
-        commentaire:  index === 0 ? comment : ''
+        membre:     memberName,
+        Nom_equipe: c ? c.nom_equipe : String(id),
+        rang:       index + 1,
+        commentaire: index === 0 ? comment : ''
       }];
     });
 
