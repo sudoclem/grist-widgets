@@ -25,53 +25,32 @@
     --bronze: #9C6B3C;
     --bronze-bg: #FBF2EA;
     --success: #2D6A4F;
-    --success-bg: #EAF4EE;
     --radius: 10px;
     --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
   }
 
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    padding: 0;
-  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
   .page { max-width: 680px; margin: 0 auto; padding: 32px 20px 60px; }
 
   .header { margin-bottom: 28px; }
-  .header h1 {
-    font-family: 'DM Serif Display', serif;
-    font-size: 26px; font-weight: 400; line-height: 1.2; margin-bottom: 8px;
-  }
+  .header h1 { font-family: 'DM Serif Display', serif; font-size: 26px; font-weight: 400; line-height: 1.2; margin-bottom: 8px; }
   .header p { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
 
   .field-block { margin-bottom: 24px; }
-  .field-label {
-    display: block; font-size: 12px; font-weight: 500;
-    letter-spacing: 0.07em; text-transform: uppercase;
-    color: var(--text-muted); margin-bottom: 8px;
-  }
+  .field-label { display: block; font-size: 12px; font-weight: 500; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
   .field-input {
-    width: 100%; padding: 10px 14px;
-    border: 1px solid var(--border); border-radius: var(--radius);
-    font-family: 'DM Sans', sans-serif; font-size: 14px;
-    background: var(--surface); color: var(--text); outline: none;
-    transition: border-color 0.15s;
+    width: 100%; padding: 10px 14px; border: 1px solid var(--border);
+    border-radius: var(--radius); font-family: 'DM Sans', sans-serif;
+    font-size: 14px; background: var(--surface); color: var(--text);
+    outline: none; transition: border-color 0.15s;
   }
   .field-input:focus { border-color: var(--accent); }
   .field-input::placeholder { color: var(--text-muted); }
 
   .section-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
-  .section-head .label {
-    font-size: 12px; font-weight: 500; letter-spacing: 0.07em;
-    text-transform: uppercase; color: var(--text-muted);
-  }
-  .section-head .hint {
-    font-size: 12px; color: var(--text-muted); margin-left: auto;
-    display: flex; align-items: center; gap: 4px;
-  }
+  .section-head .label { font-size: 12px; font-weight: 500; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-muted); }
+  .section-head .hint { font-size: 12px; color: var(--text-muted); margin-left: auto; display: flex; align-items: center; gap: 4px; }
 
   .contrib-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 28px; }
 
@@ -104,10 +83,6 @@
   .contrib-body { flex: 1; min-width: 0; }
   .contrib-title { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .contrib-meta { display: flex; align-items: center; gap: 10px; }
-  .score-pill {
-    font-size: 11px; background: #F4F2EE; color: var(--text-muted);
-    border: 1px solid var(--border); border-radius: 20px; padding: 2px 9px; white-space: nowrap;
-  }
   .contrib-link {
     font-size: 12px; color: #5C7CFA; text-decoration: none;
     display: flex; align-items: center; gap: 3px; white-space: nowrap;
@@ -149,40 +124,23 @@
   }
   .error-msg.visible { display: block; }
 
-  /* Waiting for mapping */
-  .mapping-state { text-align: center; padding: 48px 24px; }
-  .mapping-state p { color: var(--text-muted); font-size: 14px; line-height: 1.6; margin-top: 12px; }
-  .mapping-icon { font-size: 32px; margin-bottom: 4px; }
+  .mapping-state, .loading-state, .success-state { text-align: center; padding: 48px 24px; }
+  .mapping-state p, .loading-state p, .success-state p { color: var(--text-muted); font-size: 14px; line-height: 1.6; margin-top: 12px; }
+  .success-state .state-title { font-family: 'DM Serif Display', serif; font-size: 22px; font-weight: 400; color: var(--success); margin-bottom: 6px; }
 
-  .spinner {
-    width: 32px; height: 32px; border: 2px solid var(--border);
-    border-top-color: var(--accent); border-radius: 50%;
-    animation: spin 0.8s linear infinite; margin: 0 auto 12px;
-  }
+  .spinner { width: 32px; height: 32px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }
   @keyframes spin { to { transform: rotate(360deg); } }
-
-  .success-state { text-align: center; padding: 48px 24px; }
-  .success-state .state-title {
-    font-family: 'DM Serif Display', serif; font-size: 22px;
-    font-weight: 400; color: var(--success); margin-bottom: 6px;
-  }
-  .success-state p { color: var(--text-muted); font-size: 14px; line-height: 1.6; margin-top: 8px; }
 </style>
 </head>
 <body>
 <div class="page" id="app">
-  <div style="text-align:center;padding:48px 24px;">
-    <div class="spinner"></div>
-    <p style="color:var(--text-muted);font-size:14px;">Chargement…</p>
-  </div>
+  <div class="loading-state"><div class="spinner"></div><p>Chargement…</p></div>
 </div>
 
 <script>
-// ─── State ────────────────────────────────────────────────────────────────────
-let contributions = [];   // données mappées
-let orderedIds    = [];   // ordre courant (tableau d'ids)
+let contributions = [];
+let orderedIds    = [];
 let dragSrcId     = null;
-let mappingReady  = false;
 const TARGET_TABLE = 'Classements';
 
 // ─── Grist init ───────────────────────────────────────────────────────────────
@@ -190,10 +148,10 @@ grist.ready({
   requiredAccess: 'full',
   columns: [
     {
-      name: 'titre',
-      title: 'Titre de la contribution',
+      name: 'nom_equipe',
+      title: 'Nom de l\'équipe',
       type: 'Text',
-      description: 'Nom ou intitulé de la contribution à classer.'
+      description: 'Nom de l\'équipe ou de la contribution à classer.'
     },
     {
       name: 'lien',
@@ -201,43 +159,29 @@ grist.ready({
       type: 'Text',
       optional: true,
       description: 'URL permettant d\'accéder à la contribution.'
-    },
-    {
-      name: 'score_vote',
-      title: 'Score du vote',
-      type: 'Numeric',
-      optional: true,
-      description: 'Score obtenu lors du vote initial (facultatif).'
     }
   ]
 });
 
-// Appelé à chaque mise à jour des enregistrements de la table liée
 grist.onRecords(function(records, mappings) {
-  // mapColumnNames traduit les noms réels → noms déclarés dans columns ci-dessus
   const mapped = records.map(r => grist.mapColumnNames(r, mappings));
-  // On filtre les lignes où le mapping minimum (titre) n'est pas encore configuré
-  contributions = mapped.filter(r => r && r.titre !== undefined);
+  contributions = mapped.filter(r => r && r.nom_equipe !== undefined);
 
-  if (!contributions.length && !mappingReady) {
-    renderMappingNeeded();
+  if (!contributions.length) {
+    document.getElementById('app').innerHTML = `
+      <div class="mapping-state">
+        <div style="font-size:32px;">🔗</div>
+        <p>Associez vos colonnes dans le panneau latéral de Grist<br>
+        (Creator Panel → <strong>Colonnes</strong>) pour afficher les contributions.</p>
+      </div>`;
     return;
   }
-  mappingReady = true;
+
   orderedIds = contributions.map(r => r.id);
   renderApp();
 });
 
-// ─── Render helpers ───────────────────────────────────────────────────────────
-function renderMappingNeeded() {
-  document.getElementById('app').innerHTML = `
-    <div class="mapping-state">
-      <div class="mapping-icon">🔗</div>
-      <p>Configurez le mapping des colonnes dans le panneau latéral de Grist<br>
-      (Creator Panel → <strong>Colonnes</strong>) pour associer vos colonnes au widget.</p>
-    </div>`;
-}
-
+// ─── Render ───────────────────────────────────────────────────────────────────
 function renderApp() {
   document.getElementById('app').innerHTML = `
     <div class="header">
@@ -277,18 +221,16 @@ function renderCards() {
     if (!c) return '';
     const rank = index + 1;
     const rankClass = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : 'rank-other';
-    const hasLink  = c.lien  && String(c.lien).trim();
-    const hasScore = c.score_vote !== undefined && c.score_vote !== null && c.score_vote !== '';
+    const hasLink = c.lien && String(c.lien).trim();
 
     return `
       <div class="contrib-card" draggable="true" data-id="${id}">
         <div class="drag-icon" aria-hidden="true"><span></span><span></span><span></span></div>
         <div class="rank-badge ${rankClass}">${rank}</div>
         <div class="contrib-body">
-          <div class="contrib-title" title="${escHtml(c.titre)}">${escHtml(c.titre)}</div>
+          <div class="contrib-title" title="${escHtml(c.nom_equipe)}">${escHtml(c.nom_equipe)}</div>
           <div class="contrib-meta">
-            ${hasScore ? `<span class="score-pill">Score : ${c.score_vote}</span>` : ''}
-            ${hasLink  ? `<a class="contrib-link" href="${escHtml(c.lien)}" target="_blank" rel="noopener">
+            ${hasLink ? `<a class="contrib-link" href="${escHtml(c.lien)}" target="_blank" rel="noopener">
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                 <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
                 <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
@@ -316,14 +258,9 @@ function attachDragHandlers() {
   });
 }
 
-function onDragStart(e) {
-  dragSrcId = parseInt(this.dataset.id);
-  this.classList.add('dragging');
-  e.dataTransfer.effectAllowed = 'move';
-}
+function onDragStart(e) { dragSrcId = parseInt(this.dataset.id); this.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; }
 function onDragOver(e) {
-  e.preventDefault();
-  e.dataTransfer.dropEffect = 'move';
+  e.preventDefault(); e.dataTransfer.dropEffect = 'move';
   document.querySelectorAll('.contrib-card').forEach(c => c.classList.remove('drag-over'));
   this.classList.add('drag-over');
 }
@@ -357,14 +294,17 @@ async function handleSubmit() {
   errEl.classList.remove('visible');
 
   try {
-    const actions = orderedIds.map((id, index) => [
-      'AddRecord', TARGET_TABLE, null, {
+    // Une ligne par contribution : on stocke le nom de l'équipe dans le champ "contribution"
+    const actions = orderedIds.map((id, index) => {
+      const c = contributions.find(r => r.id === id);
+      return ['AddRecord', TARGET_TABLE, null, {
         membre:       memberName,
-        contribution: id,
+        contribution: c ? c.nom_equipe : String(id),
         rang:         index + 1,
         commentaire:  index === 0 ? comment : ''
-      }
-    ]);
+      }];
+    });
+
     await grist.docApi.applyUserActions(actions);
     showSuccess(memberName);
   } catch (err) {
