@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+</head>
+<body>
+<pre id="out" style="font-size:12px;padding:16px;">En attente de données...</pre>
+<script>
+grist.ready({ requiredAccess: 'full' });
+grist.onRecords(function(records) {
+  document.getElementById('out').textContent = JSON.stringify(records, null, 2);
+});
+</script>
+</body>
+</html>
